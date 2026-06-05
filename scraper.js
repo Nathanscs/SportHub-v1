@@ -78,19 +78,20 @@ function parseWslDate(dateRange, year = 2026) {
 // Determinar status de evento SLS
 function getSlsStatus(startStr, endStr) {
   const now = new Date();
-  // Zera horas para comparação de datas puras
+  
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  
+  // Reseta as horas para comparação pura de datas (dia de hoje)
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startDate = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
   
-  const [sY, sM, sD] = startStr.split('-').map(Number);
-  const [eY, eM, eD] = endStr.split('-').map(Number);
-  
-  const start = new Date(sY, sM - 1, sD);
-  const end = new Date(eY, eM - 1, eD);
-  
-  if (today > end) return 'Completed';
-  if (today >= start && today <= end) return 'Live';
+  if (today > endDate) return 'Completed';
+  if (today >= startDate && today <= endDate) return 'Live';
   return 'Upcoming';
 }
+
 
 // 3. Scraping WSL (World Surf League)
 async function scrapeWSL(browser) {
@@ -535,7 +536,7 @@ async function scrapeF1(browser) {
 async function scrapeESports() {
   console.log("Iniciando geração de eventos e rankings de eSports (CBLOL e CS2)...");
   
-  // A. Eventos CBLOL 2026
+  // A. Eventos CBLOL 2026 (Splits Gerais e Partidas Específicas)
   const cblolEvents = [
     {
       id: 'lol-2026-copa-cblol',
@@ -543,7 +544,8 @@ async function scrapeESports() {
       start: '2026-01-17',
       end: '2026-03-01',
       venue: 'Arena CBLOL, São Paulo, Brasil',
-      tv: 'Twitch (CBLOL), YouTube (CBLOL), LoLEsports'
+      tv: 'Twitch (CBLOL), YouTube (CBLOL), LoLEsports',
+      allDay: true
     },
     {
       id: 'lol-2026-cblol-split1',
@@ -551,7 +553,8 @@ async function scrapeESports() {
       start: '2026-03-28',
       end: '2026-06-06',
       venue: 'Arena CBLOL, São Paulo, Brasil',
-      tv: 'Twitch (CBLOL), YouTube (CBLOL), LoLEsports'
+      tv: 'Twitch (CBLOL), YouTube (CBLOL), LoLEsports',
+      allDay: true
     },
     {
       id: 'lol-2026-cblol-split2',
@@ -559,7 +562,45 @@ async function scrapeESports() {
       start: '2026-06-20',
       end: '2026-09-05',
       venue: 'Arena CBLOL, São Paulo, Brasil',
-      tv: 'Twitch (CBLOL), YouTube (CBLOL), LoLEsports'
+      tv: 'Twitch (CBLOL), YouTube (CBLOL), LoLEsports',
+      allDay: true
+    },
+    // Partidas Individuais do CBLOL (com horário específico)
+    {
+      id: 'lol-2026-cblol-furia-los',
+      title: '🎮 CBLOL: FURIA vs Los Grandes',
+      start: '2026-06-06T13:00:00-03:00',
+      end: '2026-06-06T16:00:00-03:00',
+      venue: 'Arena CBLOL, São Paulo, Brasil',
+      tv: 'Twitch (CBLOL), YouTube (CBLOL), LoLEsports',
+      allDay: false
+    },
+    {
+      id: 'lol-2026-cblol-loud-pain',
+      title: '🎮 CBLOL: LOUD vs paiN Gaming',
+      start: '2026-06-06T16:00:00-03:00',
+      end: '2026-06-06T19:00:00-03:00',
+      venue: 'Arena CBLOL, São Paulo, Brasil',
+      tv: 'Twitch (CBLOL), YouTube (CBLOL), LoLEsports',
+      allDay: false
+    },
+    {
+      id: 'lol-2026-cblol-keyd-red',
+      title: '🎮 CBLOL: Vivo Keyd Stars vs RED Canids',
+      start: '2026-06-07T13:00:00-03:00',
+      end: '2026-06-07T16:00:00-03:00',
+      venue: 'Arena CBLOL, São Paulo, Brasil',
+      tv: 'Twitch (CBLOL), YouTube (CBLOL), LoLEsports',
+      allDay: false
+    },
+    {
+      id: 'lol-2026-cblol-fluxo-kabum',
+      title: '🎮 CBLOL: Fluxo vs KaBuM! Esports',
+      start: '2026-06-07T16:00:00-03:00',
+      end: '2026-06-07T19:00:00-03:00',
+      venue: 'Arena CBLOL, São Paulo, Brasil',
+      tv: 'Twitch (CBLOL), YouTube (CBLOL), LoLEsports',
+      allDay: false
     }
   ];
 
@@ -574,7 +615,7 @@ async function scrapeESports() {
       title: ev.title,
       start: ev.start,
       end: ev.end,
-      allDay: true,
+      allDay: ev.allDay,
       venue: ev.venue,
       tv: ev.tv,
       status: status
@@ -583,28 +624,33 @@ async function scrapeESports() {
     await saveDocument('sport_events', ev.id, eventData);
   }
 
-  // B. Eventos CS2 Tier S 2026
+  // B. Eventos CS2 Tier S 2026 (Torneios Gerais e Partidas Específicas)
   const cs2Events = [
-    { id: 'cs2-2026-blast-winter', title: '💥 BLAST Bounty Winter 2026', start: '2026-01-12', end: '2026-01-25', venue: 'Online / Europa', tv: 'Twitch (BLAST), YouTube' },
-    { id: 'cs2-2026-iem-krakow', title: '💥 IEM Kraków 2026', start: '2026-01-28', end: '2026-02-08', venue: 'Cracóvia, Polônia', tv: 'Twitch (ESL), YouTube' },
-    { id: 'cs2-2026-pgl-cluj', title: '💥 PGL Cluj-Napoca 2026', start: '2026-02-14', end: '2026-02-22', venue: 'Cluj-Napoca, Romênia', tv: 'Twitch (PGL), YouTube' },
-    { id: 'cs2-2026-epl-s23', title: '💥 ESL Pro League Season 23', start: '2026-02-27', end: '2026-03-15', venue: 'Malta', tv: 'Twitch (ESL), YouTube' },
-    { id: 'cs2-2026-blast-spring', title: '💥 BLAST Open Spring 2026', start: '2026-03-18', end: '2026-03-29', venue: 'Europa', tv: 'Twitch (BLAST), YouTube' },
-    { id: 'cs2-2026-pgl-bucharest', title: '💥 PGL Bucharest 2026', start: '2026-04-03', end: '2026-04-11', venue: 'Bucareste, Romênia', tv: 'Twitch (PGL), YouTube' },
-    { id: 'cs2-2026-iem-rio', title: '💥 IEM Rio 2026', start: '2026-04-13', end: '2026-04-19', venue: 'Rio de Janeiro, Brasil', tv: 'Twitch (ESL), YouTube, SporTV' },
-    { id: 'cs2-2026-blast-rivals-spring', title: '💥 BLAST Rivals Spring 2026', start: '2026-04-27', end: '2026-05-03', venue: 'Europa', tv: 'Twitch (BLAST), YouTube' },
-    { id: 'cs2-2026-pgl-astana', title: '💥 PGL Astana 2026', start: '2026-05-07', end: '2026-05-17', venue: 'Astana, Cazaquistão', tv: 'Twitch (PGL), YouTube' },
-    { id: 'cs2-2026-iem-atlanta', title: '💥 IEM Atlanta 2026', start: '2026-05-11', end: '2026-05-17', venue: 'Atlanta, EUA', tv: 'Twitch (ESL), YouTube' },
-    { id: 'cs2-2026-cs-asia', title: '💥 CS Asia Championships 2026', start: '2026-05-19', end: '2026-05-24', venue: 'China', tv: 'Twitch, YouTube' },
-    { id: 'cs2-2026-iem-cologne-major', title: '⭐ IEM Cologne Major 2026 (Major 1)', start: '2026-06-02', end: '2026-06-21', venue: 'Colônia, Alemanha', tv: 'Twitch (ESL), YouTube, SporTV' },
-    { id: 'cs2-2026-blast-bounty-s2', title: '💥 BLAST Bounty Season 2', start: '2026-07-21', end: '2026-08-02', venue: 'Europa', tv: 'Twitch (BLAST), YouTube' },
-    { id: 'cs2-2026-ewc', title: '🏆 Esports World Cup 2026', start: '2026-08-12', end: '2026-08-23', venue: 'Riad, Arábia Saudita', tv: 'Twitch (EWC), YouTube, DAZN' },
-    { id: 'cs2-2026-blast-porto', title: '💥 BLAST Open Fall 2026', start: '2026-08-26', end: '2026-09-06', venue: 'Porto, Portugal', tv: 'Twitch (BLAST), YouTube' },
-    { id: 'cs2-2026-epl-s24', title: '💥 ESL Pro League Season 24', start: '2026-10-03', end: '2026-10-11', venue: 'Malta', tv: 'Twitch (ESL), YouTube' },
-    { id: 'cs2-2026-pgl-masters-buc', title: '💥 PGL Masters Bucharest 2026', start: '2026-10-24', end: '2026-10-31', venue: 'Bucareste, Romênia', tv: 'Twitch (PGL), YouTube' },
-    { id: 'cs2-2026-iem-beijing', title: '💥 IEM Beijing 2026', start: '2026-11-02', end: '2026-11-08', venue: 'Pequim, China', tv: 'Twitch (ESL), YouTube' },
-    { id: 'cs2-2026-blast-hongkong', title: '💥 BLAST Rivals Season 2', start: '2026-11-09', end: '2026-11-15', venue: 'Hong Kong', tv: 'Twitch (BLAST), YouTube' },
-    { id: 'cs2-2026-pgl-singapore-major', title: '⭐ PGL Singapore Major 2026 (Major 2)', start: '2026-11-25', end: '2026-12-13', venue: 'Cingapura', tv: 'Twitch (PGL), YouTube, SporTV' }
+    { id: 'cs2-2026-blast-winter', title: '💥 BLAST Bounty Winter 2026', start: '2026-01-12', end: '2026-01-25', venue: 'Online / Europa', tv: 'Twitch (BLAST), YouTube', allDay: true },
+    { id: 'cs2-2026-iem-krakow', title: '💥 IEM Kraków 2026', start: '2026-01-28', end: '2026-02-08', venue: 'Cracóvia, Polônia', tv: 'Twitch (ESL), YouTube', allDay: true },
+    { id: 'cs2-2026-pgl-cluj', title: '💥 PGL Cluj-Napoca 2026', start: '2026-02-14', end: '2026-02-22', venue: 'Cluj-Napoca, Romênia', tv: 'Twitch (PGL), YouTube', allDay: true },
+    { id: 'cs2-2026-epl-s23', title: '💥 ESL Pro League Season 23', start: '2026-02-27', end: '2026-03-15', venue: 'Malta', tv: 'Twitch (ESL), YouTube', allDay: true },
+    { id: 'cs2-2026-blast-spring', title: '💥 BLAST Open Spring 2026', start: '2026-03-18', end: '2026-03-29', venue: 'Europa', tv: 'Twitch (BLAST), YouTube', allDay: true },
+    { id: 'cs2-2026-pgl-bucharest', title: '💥 PGL Bucharest 2026', start: '2026-04-03', end: '2026-04-11', venue: 'Bucareste, Romênia', tv: 'Twitch (PGL), YouTube', allDay: true },
+    { id: 'cs2-2026-iem-rio', title: '💥 IEM Rio 2026', start: '2026-04-13', end: '2026-04-19', venue: 'Rio de Janeiro, Brasil', tv: 'Twitch (ESL), YouTube, SporTV', allDay: true },
+    { id: 'cs2-2026-blast-rivals-spring', title: '💥 BLAST Rivals Spring 2026', start: '2026-04-27', end: '2026-05-03', venue: 'Europa', tv: 'Twitch (BLAST), YouTube', allDay: true },
+    { id: 'cs2-2026-pgl-astana', title: '💥 PGL Astana 2026', start: '2026-05-07', end: '2026-05-17', venue: 'Astana, Cazaquistão', tv: 'Twitch (PGL), YouTube', allDay: true },
+    { id: 'cs2-2026-iem-atlanta', title: '💥 IEM Atlanta 2026', start: '2026-05-11', end: '2026-05-17', venue: 'Atlanta, EUA', tv: 'Twitch (ESL), YouTube', allDay: true },
+    { id: 'cs2-2026-cs-asia', title: '💥 CS Asia Championships 2026', start: '2026-05-19', end: '2026-05-24', venue: 'China', tv: 'Twitch, YouTube', allDay: true },
+    { id: 'cs2-2026-iem-cologne-major', title: '⭐ IEM Cologne Major 2026 (Major 1)', start: '2026-06-02', end: '2026-06-21', venue: 'Colônia, Alemanha', tv: 'Twitch (ESL), YouTube, SporTV', allDay: true },
+    { id: 'cs2-2026-blast-bounty-s2', title: '💥 BLAST Bounty Season 2', start: '2026-07-21', end: '2026-08-02', venue: 'Europa', tv: 'Twitch (BLAST), YouTube', allDay: true },
+    { id: 'cs2-2026-ewc', title: '🏆 Esports World Cup 2026', start: '2026-08-12', end: '2026-08-23', venue: 'Riad, Arábia Saudita', tv: 'Twitch (EWC), YouTube, DAZN', allDay: true },
+    { id: 'cs2-2026-blast-porto', title: '💥 BLAST Open Fall 2026', start: '2026-08-26', end: '2026-09-06', venue: 'Porto, Portugal', tv: 'Twitch (BLAST), YouTube', allDay: true },
+    { id: 'cs2-2026-epl-s24', title: '💥 ESL Pro League Season 24', start: '2026-10-03', end: '2026-10-11', venue: 'Malta', tv: 'Twitch (ESL), YouTube', allDay: true },
+    { id: 'cs2-2026-pgl-masters-buc', title: '💥 PGL Masters Bucharest 2026', start: '2026-10-24', end: '2026-10-31', venue: 'Bucareste, Romênia', tv: 'Twitch (PGL), YouTube', allDay: true },
+    { id: 'cs2-2026-iem-beijing', title: '💥 IEM Beijing 2026', start: '2026-11-02', end: '2026-11-08', venue: 'Pequim, China', tv: 'Twitch (ESL), YouTube', allDay: true },
+    { id: 'cs2-2026-blast-hongkong', title: '💥 BLAST Rivals Season 2', start: '2026-11-09', end: '2026-11-15', venue: 'Hong Kong', tv: 'Twitch (BLAST), YouTube', allDay: true },
+    { id: 'cs2-2026-pgl-singapore-major', title: '⭐ PGL Singapore Major 2026 (Major 2)', start: '2026-11-25', end: '2026-12-13', venue: 'Cingapura', tv: 'Twitch (PGL), YouTube, SporTV', allDay: true },
+    // Partidas Individuais do IEM Cologne (com horário específico)
+    { id: 'cs2-2026-cologne-furia-navi', title: '🔫 IEM Cologne: FURIA vs Natus Vincere', start: '2026-06-06T14:00:00-03:00', end: '2026-06-06T17:00:00-03:00', venue: 'Colônia, Alemanha', tv: 'Twitch (ESL), YouTube, SporTV', allDay: false },
+    { id: 'cs2-2026-cologne-mibr-g2', title: '🔫 IEM Cologne: MIBR vs G2 Esports', start: '2026-06-06T17:00:00-03:00', end: '2026-06-06T20:00:00-03:00', venue: 'Colônia, Alemanha', tv: 'Twitch (ESL), YouTube, SporTV', allDay: false },
+    { id: 'cs2-2026-cologne-vitality-spirit', title: '🔫 IEM Cologne: Team Vitality vs Team Spirit', start: '2026-06-07T14:00:00-03:00', end: '2026-06-07T17:00:00-03:00', venue: 'Colônia, Alemanha', tv: 'Twitch (ESL), YouTube, SporTV', allDay: false },
+    { id: 'cs2-2026-cologne-mouz-faze', title: '🔫 IEM Cologne: MOUZ vs FaZe Clan', start: '2026-06-07T17:00:00-03:00', end: '2026-06-07T20:00:00-03:00', venue: 'Colônia, Alemanha', tv: 'Twitch (ESL), YouTube, SporTV', allDay: false }
   ];
 
   for (const ev of cs2Events) {
@@ -618,7 +664,7 @@ async function scrapeESports() {
       title: ev.title,
       start: ev.start,
       end: ev.end,
-      allDay: true,
+      allDay: ev.allDay,
       venue: ev.venue,
       tv: ev.tv,
       status: status
