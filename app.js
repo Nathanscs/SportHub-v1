@@ -774,8 +774,7 @@ async function fetchSports() {
         "Fighting",
         "Surfing",
         "Skateboarding",
-        "eSports",
-        "ESports"
+        "eSports"
     ];
 
     try {
@@ -787,8 +786,24 @@ async function fetchSports() {
         // Verifica se a API devolveu algo vazio ou bloqueou a resposta
         if (!data || !data.sports) throw new Error("A API não retornou a lista de esportes.");
 
+        // Normaliza eSports/Esports/ESports para "eSports" e remove duplicatas de forma case-insensitive
+        let apiSports = data.sports.map(s => {
+            if (s.strSport && s.strSport.toLowerCase() === "esports") {
+                return { ...s, strSport: "eSports" };
+            }
+            return s;
+        });
+
+        const seen = new Set();
+        apiSports = apiSports.filter(s => {
+            if (!s.strSport) return false;
+            const key = s.strSport.toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+
         // Garante que "Surfing", "Skateboarding" e "eSports" estejam na lista
-        let apiSports = data.sports;
         if (!apiSports.some(s => s.strSport === "Surfing")) {
             apiSports.push({ strSport: "Surfing" });
         }
@@ -2088,7 +2103,8 @@ async function showMatchDetails(eventTitle, leagueName, sportName, dateText, tim
     const isBasketball = sportUpper.includes('BASKET') || sportUpper.includes('BASQUETE');
     let sportEmoji = getSportEmoji(sportName);
 
-    const isIndividualOrMotorsport = sportUpper.includes('SURF') || sportUpper.includes('SKATE') || sportUpper.includes('MOTOR') || leagueLower.includes('formula') || leagueLower.includes('motogp') || leagueLower.includes('superbike') || leagueLower.includes('f1');
+    const isEsports = sportUpper.includes('ESPORTS') || sportUpper.includes('ESPORT') || leagueLower.includes('cblol') || leagueLower.includes('cs2') || leagueLower.includes('cs:go') || leagueLower.includes('csgo');
+    const isIndividualOrMotorsport = sportUpper.includes('SURF') || sportUpper.includes('SKATE') || sportUpper.includes('MOTOR') || leagueLower.includes('formula') || leagueLower.includes('motogp') || leagueLower.includes('superbike') || leagueLower.includes('f1') || isEsports;
 
     // Mostra/oculta o divisor "VS"
     const vsEl = modal.querySelector('.modal-vs');
@@ -2147,9 +2163,32 @@ async function showMatchDetails(eventTitle, leagueName, sportName, dateText, tim
     let stats = `${teamA} vs ${teamB} - Estatísticas em processamento para esta temporada.`;
     let odds = `${teamA}: 40% | Empate: 30% | ${teamB}: 30%`;
 
+    let cleanTeamA = teamA;
+    if (cleanTeamA && cleanTeamA.includes(': ')) {
+        const parts = cleanTeamA.split(': ');
+        cleanTeamA = parts[parts.length - 1];
+    }
+    let cleanTeamB = teamB;
+    if (cleanTeamB && cleanTeamB.includes(': ')) {
+        const parts = cleanTeamB.split(': ');
+        cleanTeamB = parts[parts.length - 1];
+    }
 
-
-    if (leagueLower.includes('premier league') || leagueLower.includes('inglês')) {
+    if (isEsports) {
+        venue = "Arena de eSports / Online";
+        tv = "Twitch, YouTube ou canais oficiais de transmissão";
+        if (leagueLower.includes('cblol') || eventTitle.toLowerCase().includes('cblol')) {
+            venue = "Arena CBLOL (São Paulo, Brasil)";
+            tv = "Twitch (CBLOL), YouTube (CBLOL), LoLEsports";
+            stats = `CBLOL 2026 - Split 1. Partida em formato MD3 (Melhor de 3). Confronto direto entre ${cleanTeamA} e ${cleanTeamB} valendo pontos cruciais no Summoner's Rift.`;
+            odds = `${cleanTeamA || 'Equipe A'}: 50% | ${cleanTeamB || 'Equipe B'}: 50%`;
+        } else {
+            venue = "Arena de eSports / Online";
+            tv = "Twitch (ESL), YouTube, SporTV";
+            stats = `Campeonato de CS2 Tier S. Partida em formato MD3 (Melhor de 3) entre ${cleanTeamA} e ${cleanTeamB} em mapas competitivos oficiais (Active Duty).`;
+            odds = `${cleanTeamA || 'Equipe A'}: 50% | ${cleanTeamB || 'Equipe B'}: 50%`;
+        }
+    } else if (leagueLower.includes('premier league') || leagueLower.includes('inglês')) {
         tv = "ESPN e Disney+";
         venue = teamA ? `Estádio do ${teamA} (Inglaterra)` : "Estádio na Inglaterra";
         stats = `${teamA} disputa a Premier League nesta temporada. Equipes com alto índice de finalizações.`;
@@ -2267,6 +2306,19 @@ async function showMatchDetails(eventTitle, leagueName, sportName, dateText, tim
                     doc2Ref = doc(db, "sport_rankings", "f1-constructors");
                     tab1Name = "Pilotos";
                     tab2Name = "Construtores";
+                } else if (isEsports) {
+                    const isCblol = leagueLower.includes('cblol') || eventTitle.toLowerCase().includes('cblol');
+                    if (isCblol) {
+                        doc1Ref = doc(db, "sport_rankings", "lol-cblol");
+                        doc2Ref = doc(db, "sport_rankings", "lol-worlds");
+                        tab1Name = "CBLOL Split 1";
+                        tab2Name = "Worlds (Mundial)";
+                    } else {
+                        doc1Ref = doc(db, "sport_rankings", "cs2-world");
+                        doc2Ref = doc(db, "sport_rankings", "cs2-majors");
+                        tab1Name = "HLTV World Ranking";
+                        tab2Name = "Major Winners";
+                    }
                 } else if (sportUpper.includes('MOTOR') || leagueLower.includes('formula') || leagueLower.includes('motogp') || leagueLower.includes('superbike')) {
                     // Outras categorias de automobilismo/motociclismo
                     doc1Ref = doc(db, "sport_rankings", `${leagueLower.replace(/[^a-z0-9]+/g, '-')}-drivers`);
