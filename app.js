@@ -773,7 +773,9 @@ async function fetchSports() {
         "Volleyball",
         "Fighting",
         "Surfing",
-        "Skateboarding"
+        "Skateboarding",
+        "eSports",
+        "ESports"
     ];
 
     try {
@@ -785,13 +787,16 @@ async function fetchSports() {
         // Verifica se a API devolveu algo vazio ou bloqueou a resposta
         if (!data || !data.sports) throw new Error("A API não retornou a lista de esportes.");
 
-        // Garante que "Surfing" e "Skateboarding" estejam na lista
+        // Garante que "Surfing", "Skateboarding" e "eSports" estejam na lista
         let apiSports = data.sports;
         if (!apiSports.some(s => s.strSport === "Surfing")) {
             apiSports.push({ strSport: "Surfing" });
         }
         if (!apiSports.some(s => s.strSport === "Skateboarding")) {
             apiSports.push({ strSport: "Skateboarding" });
+        }
+        if (!apiSports.some(s => s.strSport === "eSports")) {
+            apiSports.push({ strSport: "eSports" });
         }
 
         // Ordena os esportes por importância
@@ -835,7 +840,8 @@ async function fetchSports() {
             { idAPI: "Volleyball", nomePtBr: "Vôlei" },
             { idAPI: "Fighting", nomePtBr: "Artes marciais" },
             { idAPI: "Surfing", nomePtBr: "Surfe" },
-            { idAPI: "Skateboarding", nomePtBr: "Skate" }
+            { idAPI: "Skateboarding", nomePtBr: "Skate" },
+            { idAPI: "eSports", nomePtBr: "eSports" }
         ];
 
         esportesDeEmergencia.forEach(sport => {
@@ -850,6 +856,7 @@ async function fetchSports() {
         });
     }
 }
+
 
 async function fetchLeagues(sportNameId, nomePtBr) {
     const list = document.getElementById('sports-list');

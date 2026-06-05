@@ -531,6 +531,193 @@ async function scrapeF1(browser) {
   await page.close();
 }
 
+// 6. Geração de dados de eSports (CBLOL e CS2 Tier S)
+async function scrapeESports() {
+  console.log("Iniciando geração de eventos e rankings de eSports (CBLOL e CS2)...");
+  
+  // A. Eventos CBLOL 2026
+  const cblolEvents = [
+    {
+      id: 'lol-2026-copa-cblol',
+      title: '🏆 Copa CBLOL 2026',
+      start: '2026-01-17',
+      end: '2026-03-01',
+      venue: 'Arena CBLOL, São Paulo, Brasil',
+      tv: 'Twitch (CBLOL), YouTube (CBLOL), LoLEsports'
+    },
+    {
+      id: 'lol-2026-cblol-split1',
+      title: '🔥 CBLOL 2026 - Split 1',
+      start: '2026-03-28',
+      end: '2026-06-06',
+      venue: 'Arena CBLOL, São Paulo, Brasil',
+      tv: 'Twitch (CBLOL), YouTube (CBLOL), LoLEsports'
+    },
+    {
+      id: 'lol-2026-cblol-split2',
+      title: '🔥 CBLOL 2026 - Split 2',
+      start: '2026-06-20',
+      end: '2026-09-05',
+      venue: 'Arena CBLOL, São Paulo, Brasil',
+      tv: 'Twitch (CBLOL), YouTube (CBLOL), LoLEsports'
+    }
+  ];
+
+  for (const ev of cblolEvents) {
+    const status = getSlsStatus(ev.start, ev.end);
+    const eventData = {
+      id: ev.id,
+      sport: 'eSports',
+      strSport: 'eSports',
+      leagueId: 'cblol',
+      leagueName: 'CBLOL (League of Legends)',
+      title: ev.title,
+      start: ev.start,
+      end: ev.end,
+      allDay: true,
+      venue: ev.venue,
+      tv: ev.tv,
+      status: status
+    };
+    console.log(`eSports: Salvando evento CBLOL: ${eventData.title} (${eventData.status})`);
+    await saveDocument('sport_events', ev.id, eventData);
+  }
+
+  // B. Eventos CS2 Tier S 2026
+  const cs2Events = [
+    { id: 'cs2-2026-blast-winter', title: '💥 BLAST Bounty Winter 2026', start: '2026-01-12', end: '2026-01-25', venue: 'Online / Europa', tv: 'Twitch (BLAST), YouTube' },
+    { id: 'cs2-2026-iem-krakow', title: '💥 IEM Kraków 2026', start: '2026-01-28', end: '2026-02-08', venue: 'Cracóvia, Polônia', tv: 'Twitch (ESL), YouTube' },
+    { id: 'cs2-2026-pgl-cluj', title: '💥 PGL Cluj-Napoca 2026', start: '2026-02-14', end: '2026-02-22', venue: 'Cluj-Napoca, Romênia', tv: 'Twitch (PGL), YouTube' },
+    { id: 'cs2-2026-epl-s23', title: '💥 ESL Pro League Season 23', start: '2026-02-27', end: '2026-03-15', venue: 'Malta', tv: 'Twitch (ESL), YouTube' },
+    { id: 'cs2-2026-blast-spring', title: '💥 BLAST Open Spring 2026', start: '2026-03-18', end: '2026-03-29', venue: 'Europa', tv: 'Twitch (BLAST), YouTube' },
+    { id: 'cs2-2026-pgl-bucharest', title: '💥 PGL Bucharest 2026', start: '2026-04-03', end: '2026-04-11', venue: 'Bucareste, Romênia', tv: 'Twitch (PGL), YouTube' },
+    { id: 'cs2-2026-iem-rio', title: '💥 IEM Rio 2026', start: '2026-04-13', end: '2026-04-19', venue: 'Rio de Janeiro, Brasil', tv: 'Twitch (ESL), YouTube, SporTV' },
+    { id: 'cs2-2026-blast-rivals-spring', title: '💥 BLAST Rivals Spring 2026', start: '2026-04-27', end: '2026-05-03', venue: 'Europa', tv: 'Twitch (BLAST), YouTube' },
+    { id: 'cs2-2026-pgl-astana', title: '💥 PGL Astana 2026', start: '2026-05-07', end: '2026-05-17', venue: 'Astana, Cazaquistão', tv: 'Twitch (PGL), YouTube' },
+    { id: 'cs2-2026-iem-atlanta', title: '💥 IEM Atlanta 2026', start: '2026-05-11', end: '2026-05-17', venue: 'Atlanta, EUA', tv: 'Twitch (ESL), YouTube' },
+    { id: 'cs2-2026-cs-asia', title: '💥 CS Asia Championships 2026', start: '2026-05-19', end: '2026-05-24', venue: 'China', tv: 'Twitch, YouTube' },
+    { id: 'cs2-2026-iem-cologne-major', title: '⭐ IEM Cologne Major 2026 (Major 1)', start: '2026-06-02', end: '2026-06-21', venue: 'Colônia, Alemanha', tv: 'Twitch (ESL), YouTube, SporTV' },
+    { id: 'cs2-2026-blast-bounty-s2', title: '💥 BLAST Bounty Season 2', start: '2026-07-21', end: '2026-08-02', venue: 'Europa', tv: 'Twitch (BLAST), YouTube' },
+    { id: 'cs2-2026-ewc', title: '🏆 Esports World Cup 2026', start: '2026-08-12', end: '2026-08-23', venue: 'Riad, Arábia Saudita', tv: 'Twitch (EWC), YouTube, DAZN' },
+    { id: 'cs2-2026-blast-porto', title: '💥 BLAST Open Fall 2026', start: '2026-08-26', end: '2026-09-06', venue: 'Porto, Portugal', tv: 'Twitch (BLAST), YouTube' },
+    { id: 'cs2-2026-epl-s24', title: '💥 ESL Pro League Season 24', start: '2026-10-03', end: '2026-10-11', venue: 'Malta', tv: 'Twitch (ESL), YouTube' },
+    { id: 'cs2-2026-pgl-masters-buc', title: '💥 PGL Masters Bucharest 2026', start: '2026-10-24', end: '2026-10-31', venue: 'Bucareste, Romênia', tv: 'Twitch (PGL), YouTube' },
+    { id: 'cs2-2026-iem-beijing', title: '💥 IEM Beijing 2026', start: '2026-11-02', end: '2026-11-08', venue: 'Pequim, China', tv: 'Twitch (ESL), YouTube' },
+    { id: 'cs2-2026-blast-hongkong', title: '💥 BLAST Rivals Season 2', start: '2026-11-09', end: '2026-11-15', venue: 'Hong Kong', tv: 'Twitch (BLAST), YouTube' },
+    { id: 'cs2-2026-pgl-singapore-major', title: '⭐ PGL Singapore Major 2026 (Major 2)', start: '2026-11-25', end: '2026-12-13', venue: 'Cingapura', tv: 'Twitch (PGL), YouTube, SporTV' }
+  ];
+
+  for (const ev of cs2Events) {
+    const status = getSlsStatus(ev.start, ev.end);
+    const eventData = {
+      id: ev.id,
+      sport: 'eSports',
+      strSport: 'eSports',
+      leagueId: 'cs2_tier_s',
+      leagueName: 'CS2: Campeonatos Tier S',
+      title: ev.title,
+      start: ev.start,
+      end: ev.end,
+      allDay: true,
+      venue: ev.venue,
+      tv: ev.tv,
+      status: status
+    };
+    console.log(`eSports: Salvando evento CS2: ${eventData.title} (${eventData.status})`);
+    await saveDocument('sport_events', ev.id, eventData);
+  }
+
+  // C. Rankings/Tabelas de eSports
+  // LoL CBLOL Split 1 Standings
+  const cblolStandings = [
+    { position: 1, name: 'paiN Gaming', country: 'BRA', points: '14-4' },
+    { position: 2, name: 'LOUD', country: 'BRA', points: '13-5' },
+    { position: 3, name: 'Vivo Keyd Stars', country: 'BRA', points: '12-6' },
+    { position: 4, name: 'RED Canids', country: 'BRA', points: '11-7' },
+    { position: 5, name: 'FURIA Esports', country: 'BRA', points: '10-8' },
+    { position: 6, name: 'Fluxo', country: 'BRA', points: '8-10' },
+    { position: 7, name: 'KaBuM! Esports', country: 'BRA', points: '7-11' },
+    { position: 8, name: 'INTZ', country: 'BRA', points: '6-12' },
+    { position: 9, name: 'Liberty', country: 'BRA', points: '5-13' },
+    { position: 10, name: 'Los Grandes', country: 'BRA', points: '4-14' }
+  ];
+
+  await saveDocument('sport_rankings', 'lol-cblol', {
+    sport: 'eSports',
+    leagueId: 'cblol',
+    category: 'cblol',
+    updatedAt: new Date().toISOString(),
+    rankings: cblolStandings
+  });
+
+  // LoL Worlds / Global Popular Teams
+  const worldsStandings = [
+    { position: 1, name: 'T1', country: 'KOR', points: 'Campeão Mundial' },
+    { position: 2, name: 'Gen.G Esports', country: 'KOR', points: 'Vice-Campeão' },
+    { position: 3, name: 'Bilibili Gaming', country: 'CHN', points: 'Semifinalista' },
+    { position: 4, name: 'Weibo Gaming', country: 'CHN', points: 'Semifinalista' },
+    { position: 5, name: 'G2 Esports', country: 'EUR', points: 'Fase Suíça' },
+    { position: 6, name: 'Fnatic', country: 'EUR', points: 'Fase Suíça' },
+    { position: 7, name: 'FlyQuest', country: 'USA', points: 'Fase Suíça' },
+    { position: 8, name: 'Team Liquid', country: 'USA', points: 'Fase Suíça' }
+  ];
+
+  await saveDocument('sport_rankings', 'lol-worlds', {
+    sport: 'eSports',
+    leagueId: 'cblol',
+    category: 'worlds',
+    updatedAt: new Date().toISOString(),
+    rankings: worldsStandings
+  });
+
+  // CS2 HLTV World Ranking
+  const cs2WorldRanking = [
+    { position: 1, name: 'Natus Vincere', country: 'UKR', points: '980 PTS' },
+    { position: 2, name: 'Team Vitality', country: 'FRA', points: '850 PTS' },
+    { position: 3, name: 'Team Spirit', country: 'RUS', points: '810 PTS' },
+    { position: 4, name: 'G2 Esports', country: 'EUR', points: '790 PTS' },
+    { position: 5, name: 'MOUZ', country: 'GER', points: '740 PTS' },
+    { position: 6, name: 'FaZe Clan', country: 'USA', points: '620 PTS' },
+    { position: 7, name: 'Virtus.pro', country: 'RUS', points: '540 PTS' },
+    { position: 8, name: 'Astralis', country: 'DEN', points: '480 PTS' },
+    { position: 9, name: 'FURIA Esports', country: 'BRA', points: '390 PTS' },
+    { position: 10, name: 'MIBR', country: 'BRA', points: '320 PTS' },
+    { position: 11, name: 'The MongolZ', country: 'MNG', points: '290 PTS' },
+    { position: 12, name: 'Complexity', country: 'USA', points: '270 PTS' },
+    { position: 13, name: 'Eternal Fire', country: 'TUR', points: '250 PTS' },
+    { position: 14, name: 'HEROIC', country: 'DEN', points: '240 PTS' },
+    { position: 15, name: 'Imperial Esports', country: 'BRA', points: '210 PTS' }
+  ];
+
+  await saveDocument('sport_rankings', 'cs2-world', {
+    sport: 'eSports',
+    leagueId: 'cs2_tier_s',
+    category: 'world',
+    updatedAt: new Date().toISOString(),
+    rankings: cs2WorldRanking
+  });
+
+  // CS2 Major Winners/Historics
+  const cs2Majors = [
+    { position: 1, name: 'PGL Major Copenhagen 2024', country: 'DEN', points: 'Natus Vincere' },
+    { position: 2, name: 'Perfect World Shanghai Major 2024', country: 'CHN', points: 'G2 Esports' },
+    { position: 3, name: 'BLAST.tv Paris Major 2023', country: 'FRA', points: 'Team Vitality' },
+    { position: 4, name: 'IEM Rio Major 2022', country: 'BRA', points: 'Outsiders' },
+    { position: 5, name: 'PGL Major Antwerp 2022', country: 'BEL', points: 'FaZe Clan' },
+    { position: 6, name: 'PGL Major Stockholm 2021', country: 'SWE', points: 'Natus Vincere' }
+  ];
+
+  await saveDocument('sport_rankings', 'cs2-majors', {
+    sport: 'eSports',
+    leagueId: 'cs2_tier_s',
+    category: 'majors',
+    updatedAt: new Date().toISOString(),
+    rankings: cs2Majors
+  });
+
+  console.log("eSports: Eventos e rankings gerados com sucesso.");
+}
+
 // Execução principal
 (async () => {
   console.log("--- INICIANDO PROCESSO DE SCRAPING DE ESPORTES ---");
@@ -546,6 +733,7 @@ async function scrapeF1(browser) {
     await scrapeWSL(browser);
     await scrapeSLS(browser);
     await scrapeF1(browser);
+    await scrapeESports();
     console.log("--- SCRAPING CONCLUÍDO COM SUCESSO! ---");
   } catch (error) {
     console.error("Erro crítico no processo de scraping:", error);
@@ -554,4 +742,5 @@ async function scrapeF1(browser) {
     process.exit(0);
   }
 })();
+
 
